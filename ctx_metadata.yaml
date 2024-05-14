@@ -1,0 +1,10 @@
+owner: danielte
+pipeline:
+  citool: ''
+  releaseBranch: ''
+  sonarqube: null
+productionUse: CustomerCurrent
+repoType: Documentation
+reporting:
+  product: Workspace
+  teamname: Workspace
