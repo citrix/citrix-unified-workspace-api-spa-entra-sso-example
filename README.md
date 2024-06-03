@@ -37,7 +37,7 @@ This is because the Entra ID SSO SPA is configured to run on `https://localhost:
 
 ### SPA
 
-The SPA code assumes that you are running the TMS on `https://localhost:7182`. If you want to change that, you'll need to update the "TokenManagementBaseUri" field in [appsettings.json](./Citrix.UnifiedApi.Test.SPA.AAD/appsettings.json).
+The SPA code assumes that you are running the TMS on `https://localhost:7182`. If you're running the TMS on a different host, update the "TokenManagementBaseUri" field in [appsettings.json](./Citrix.UnifiedApi.Test.SPA.AAD/appsettings.json) to the correct value.
 
 ## Running the example
 
@@ -114,7 +114,11 @@ function sessionCreated(sessionObject){
 citrix.receiver.createSession(sessionId, connectionParams,sessionCreated);
 ```
 
-## Javascript Libraries
+## Attributions
+
+The repo includes the following NuGet packages:
+
+- Microsoft.Identity.Web, https://www.nuget.org/packages/Microsoft.Identity.Web
 
 The repo includes the following JavaScript libraries:
 
@@ -125,5 +129,7 @@ The repo includes the following JavaScript libraries:
 - Citrix HTML5 HDX SDK, https://developer-docs.citrix.com/en-us/citrix-workspace-app-for-html5/workspace-app-html5-hdx-sdx/hdx-sdk-html5
 
 ## License
+
+This project is licensed under the MIT license. The text can be found in the [LICENSE file](./LICENSE).
 
 Copyright © 2024. Cloud Software Group, Inc. All Rights Reserved.
