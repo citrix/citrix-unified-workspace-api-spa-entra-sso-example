@@ -1,4 +1,4 @@
-# Citrix Unified Workspace API - Single Page Application (SPA) Single Sign-On sample built with .Net Core and Javascript
+# Citrix(R) Unified Workspace API - Single Page Application (SPA) Single Sign-On sample built with .Net Core and Javascript
 
 A sample Single Page Application that shows how to interact with Unified Workspace APIs using Entra ID, using Single Sign-On to get a Unified Workspace API access token after an initial Entra ID logon. It is a pure JavaScript implementation that is hosted by a C# ASP .NET server.
 
