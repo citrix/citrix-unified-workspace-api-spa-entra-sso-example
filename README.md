@@ -15,7 +15,7 @@ This is purely an example and shouldn't be used for real production services.
 ## Prerequisites
 
 - You have either a Private or Public Workspace OAuth Client
-- You will be running the example code in Visual Studio and can run [.NET 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+- You will be running the example code in Visual Studio and can run [.NET 9.0](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
 - You have the [Citrix Workspace App](https://www.citrix.com/downloads/workspace-app/windows/workspace-app-for-windows-latest.html) installed
 
 ## Getting Started
@@ -75,6 +75,8 @@ Clicking on the resources should initiate a launch, which will be handled by the
 ## SPA and Token Management Service Sequence Diagram
 
 This sequence diagram illustrates the API calls the example Single Page Application (SPA) and the Token Management Service (TMS) will make during the initial page load, login, resource enumeration and resource launch, including the single sign-on interaction with Entra ID.
+
+Note: Calls to the Workspace API should be `https://{CUSTOMER_DOMAIN}/citrixapi` instead of `customer.cloud.com/api`.
 
 ![Token Management Service Sequence](./sequence/key-journeys.png)
 
