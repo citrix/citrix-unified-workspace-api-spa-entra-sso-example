@@ -134,4 +134,4 @@ The repo includes the following JavaScript libraries:
 
 This project is licensed under the MIT license. The text can be found in the [LICENSE file](./LICENSE).
 
-Copyright © 2024. Cloud Software Group, Inc. All Rights Reserved.
+Copyright © 2025. Cloud Software Group, Inc. All Rights Reserved.

@@ -63,4 +63,4 @@ This example is a backend, and therefore runs in the background awaiting client 
 
 ## License
 
-Copyright © 2024. Cloud Software Group, Inc. All Rights Reserved.
+Copyright © 2025. Cloud Software Group, Inc. All Rights Reserved.
