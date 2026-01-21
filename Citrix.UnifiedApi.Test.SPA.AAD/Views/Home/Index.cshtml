@@ -140,7 +140,7 @@ in the license file that is distributed with this file.
         })
         
         let launching = false
-        async function PerformLaunch(card, launchUrl) {
+        async function PerformLaunch(card, icaFileFetchTicketUrl) {
             if (launching) {
                 return;
             }
@@ -153,7 +153,7 @@ in the license file that is distributed with this file.
                 const launchType = document.getElementById('launch-type').value
                 switch (launchType) {
                     case "Receiver": {
-                        await launchReceiver(launchUrl)
+                        await launchReceiver(icaFileFetchTicketUrl)
                         break;
                     }
                     case "HTML5": {
@@ -173,16 +173,19 @@ in the license file that is distributed with this file.
         }
         
         async function launchReceiver(launchUrl) {
-            let launchTicketResponse = await apiHandler.post(launchUrl)
+            let launchTicketResponse = await apiHandler.get(launchUrl)
         
             let receiverUri = launchTicketResponse.data.receiverUri
             window.open(receiverUri, "Launching...")
         }
-        
+
+        // Keep reference to session object to prevent premature cleanup
+        let html5SessionObject = null;
+
         async function launchHTML5(launchUrl) {
-            // Set the URL and port that this example is hosted on
-            citrix.receiver.setPath("https://localhost:7500/receiver");
             let icaFile = await apiHandler.get(launchUrl)
+            console.log(launchUrl)
+            console.log(icaFile)
             const sessionId = "html5"
             const connectionParams = {
                 "launchType": "newtab",
@@ -190,18 +193,56 @@ in the license file that is distributed with this file.
                     "type": "window"
                 }
             };
-        
+
             function sessionCreated(sessionObject){
-                const launchData = {"type": "ini", value: icaFile.data};
+                // Store session object reference to prevent garbage collection
+                html5SessionObject = sessionObject;
+
+                // Adding onConnection event handler
+                function connectionHandler(event) {
+                    console.log("Event Received : " + event.type);
+                    console.log(event.data);
+                }
+                sessionObject.addListener("onConnection", connectionHandler);
+
+                // Adding onConnectionClosed event handler
+                function connectionClosedHandler(event) {
+                    console.log("Event Received : " + event.type);
+                    console.log(event.data);
+                    // Clear session reference on close
+                    html5SessionObject = null;
+                }
+                sessionObject.addListener("onConnectionClosed", connectionClosedHandler);
+
+                // Adding onError event handler
+                function onErrorHandler(event) {
+                    console.log("Event Received : " + event.type);
+                    console.log(event.data);
+                }
+                sessionObject.addListener("onError", onErrorHandler);
+
+                // Adding onURLRedirection event handler
+                function onURLRedirectionHandler(event) {
+                    console.log("Event Received : " + event.type);
+                    console.log(event.data);
+                }
+                sessionObject.addListener("onURLRedirection", onURLRedirectionHandler);
+
+                const launchData = { "type": "ini", "value": icaFile.data };
                 sessionObject.start(launchData);
             }
-            
-            citrix.receiver.createSession(sessionId, connectionParams,sessionCreated);
+            try {
+                citrix.receiver.setPath("CDN");
+                citrix.receiver.createSession(sessionId, connectionParams, sessionCreated);
+            } catch (ex) {
+                console.log(ex)
+            }
         }
-        
+
+        // Keep reference to iframe session object to prevent premature cleanup
+        let iframeSessionObject = null;
+
         async function launchIFrame(launchUrl) {
-            // Set the URL and port that this example is hosted on
-            citrix.receiver.setPath("https://localhost:7500/receiver");
             let icaFile = await apiHandler.get(launchUrl)
             const id = "iframe"
             const connectionParams = {
@@ -211,20 +252,53 @@ in the license file that is distributed with this file.
                     "id": "sessionIframe"
                 }
             };
-        
+
             document.getElementById("sessionIframe").style.display = "block";
-        
+
             function sessionCreated(sessionObject){
-                function connectionClosedHandler(event){
-                    document.getElementById("sessionIframe").style.display = "none";
+                // Store session object reference to prevent garbage collection
+                iframeSessionObject = sessionObject;
+
+                // Adding onConnection event handler
+                function connectionHandler(event) {
+                    console.log("Event Received : " + event.type);
+                    console.log(event.data);
                 }
-                sessionObject.addListener("onConnectionClosed",connectionClosedHandler);
-        
-        
-                const launchData = {"type": "ini", value: icaFile.data};
+                sessionObject.addListener("onConnection", connectionHandler);
+
+                // Adding onConnectionClosed event handler
+                function connectionClosedHandler(event){
+                    console.log("Event Received : " + event.type);
+                    console.log(event.data);
+                    document.getElementById("sessionIframe").style.display = "none";
+                    // Clear session reference on close
+                    iframeSessionObject = null;
+                }
+                sessionObject.addListener("onConnectionClosed", connectionClosedHandler);
+
+                // Adding onError event handler
+                function onErrorHandler(event) {
+                    console.log("Event Received : " + event.type);
+                    console.log(event.data);
+                }
+                sessionObject.addListener("onError", onErrorHandler);
+
+                // Adding onURLRedirection event handler
+                function onURLRedirectionHandler(event) {
+                    console.log("Event Received : " + event.type);
+                    console.log(event.data);
+                }
+                sessionObject.addListener("onURLRedirection", onURLRedirectionHandler);
+
+                const launchData = {"type": "ini", "value": icaFile.data};
                 sessionObject.start(launchData);
             }
-            citrix.receiver.createSession(id, connectionParams,sessionCreated);
+            try {
+                citrix.receiver.setPath("CDN");
+                citrix.receiver.createSession(id, connectionParams, sessionCreated);
+            } catch (ex) {
+                console.log(ex)
+            }
         }
     </script>
 
@@ -235,9 +309,9 @@ in the license file that is distributed with this file.
         <div class="ui eight cards">
             {{#each resources}}
             <div class="ui card" 
-                onclick="PerformLaunch(this, '{{links.launchStatusUrl}}')"
-                data-launchStatus="{{ links.launchStatusUrl }}" 
-                data-launchIca="{{ links.launchUrl }}">
+                onclick="PerformLaunch(this, '{{links.icaFileFetchTicketUrl}}')"
+                data-launchStatus="{{ links.icaFileFetchTicketUrl }}"
+                data-launchIca="{{ links.icaFileUrl }}">
                 <div class="ui loader"></div>
                 <div class="image">
                     <img src="{{links.imageUrl}}" width="32" height="32">
