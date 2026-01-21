@@ -184,8 +184,6 @@ in the license file that is distributed with this file.
 
         async function launchHTML5(launchUrl) {
             let icaFile = await apiHandler.get(launchUrl)
-            console.log(launchUrl)
-            console.log(icaFile)
             const sessionId = "html5"
             const connectionParams = {
                 "launchType": "newtab",
