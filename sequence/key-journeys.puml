@@ -1,0 +1,56 @@
+@startuml
+skinparam ParticipantPadding 20
+skinparam BoxPadding 10
+
+participant "Browser" as B
+participant "Single Page Application" as SPA
+participant "Entra ID" as EID
+participant "Token Management Service" as TMS
+participant "Citrix Authorization Server" as CAS
+participant "Workspace API" as WAPI
+participant "Web Helper" as WH
+
+group seq [Login]
+    B -> SPA : Load
+    SPA -> EID : Initiate Login
+    EID -->> SPA : Return token
+    SPA -> TMS : GET /configuration
+    TMS -> WAPI : GET https://{CUSTOMER_DOMAIN}/citrixapi/discovery/configurations
+    WAPI -->> TMS : Configurations document
+    TMS -->> SPA : Configurations document
+    SPA -> TMS : GET /accesstoken
+    TMS -> CAS : GET /core/.well-known/openid-configuration
+    CAS -->> TMS : OpenID configuration document
+    TMS -> CAS : GET /core/connect/authorize
+    CAS -->> TMS : 302 Initiate authentication flow
+    TMS -->> SPA : 401 Unauthorized - NoToken
+    SPA -> B : 302 Redirect to /core/login, redirecting browser to Citrix Identity Provider
+    B -> CAS : GET /core/login
+    CAS -> EID : Redirect to authenticate
+    EID -->> CAS : Session already exists, returns success
+    B -> TMS : GET /oauth/callback + auth code
+    TMS -> CAS : GET /core/authorize/callback
+    CAS -->> TMS : Refresh token + [Access Token 1]
+    TMS -> TMS : Create authenticated web session
+    TMS -->> SPA : [Access Token 1] + authenticated session cookie
+end
+
+group seq [Enumeration]
+    B -> SPA : Get Resources
+    SPA -> WAPI : GET https://{CUSTOMER_DOMAIN}/citrixapi/store/resources [Access Token 1]
+    WAPI -->> SPA : Resource details
+    SPA -->> B : Display resources
+end
+
+group seq [Native HDX Launch (Protocol Handler)]
+    B -> SPA : Native Launch
+    SPA -> WAPI : GET https://{CUSTOMER_DOMAIN}/citrixapi/store/resources/{resourceId}/icaFileFetchTicket [Access Token 1]
+    WAPI -->> SPA : Ica File Fetch Ticket Response (Extract `receiverUri://...`)
+    SPA -> B : Initiate protocol handler by opening `receiverUri://...`
+    B -> WH : Transfer ticket data
+    WH -> WAPI : POST https://{CUSTOMER_DOMAIN}/citrixapi/store/client/icaFile [Body: ticket]
+    WAPI -->> WH : ICA file
+    WH -> WH : HDX Launch
+end
+
+@enduml

@@ -15,7 +15,7 @@ This is purely an example and shouldn't be used for real production services.
 ## Prerequisites
 
 - You have either a Private or Public Workspace OAuth Client
-- You will be running the example code in Visual Studio and can run [.NET 9.0](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
+- You will be running the example code in Visual Studio and can run [.NET 10.0](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 - You have the [Citrix Workspace App](https://www.citrix.com/downloads/workspace-app/windows/workspace-app-for-windows-latest.html) installed
 
 ## Getting Started
@@ -76,8 +76,6 @@ Clicking on the resources should initiate a launch, which will be handled by the
 
 This sequence diagram illustrates the API calls the example Single Page Application (SPA) and the Token Management Service (TMS) will make during the initial page load, login, resource enumeration and resource launch, including the single sign-on interaction with Entra ID.
 
-Note: Calls to the Workspace API should be `https://{CUSTOMER_DOMAIN}/citrixapi` instead of `customer.cloud.com/api`.
-
 ![Token Management Service Sequence](./sequence/key-journeys.png)
 
 ## Javascript
@@ -89,17 +87,18 @@ The implementation retrieves the access token and stores it inside a private Jav
 ## Resource launches
 This example supports three types of launch: native (using the Citrix Workspace App), HTML5, and IFrame.
 
-### Native launches
-Native launches work by calling the native Citrix Workspace App with a launch ticket that can obtained from the `launchstatus` endpoint on a resource. This response contains the URL to redirect the user to.
+### "Receiver" Ticketed ICA launch (Citrix Workspace App)
+
+Citrix Workspace App (CWA) launches work by calling the receiver (old name for the CWA) with a launch ticket that can obtained from the `icaFileFetchTicketUrl` endpoint on a resource (see resource enumeration response for details). 
+The API endpoint will return a `receiverUri` which can be directly opened via a browser to start the Citrix Workspace App that performs the launch.
 
 ### HTML5 and IFrame launches
-HTML5 and IFrame launches work similarly to each other. These launch methods make use of the Citrix HTML5 HDX SDK. This SDK uses the ICA file which contains information about how a connection should be established. An ICA file can be obtained from the `launchica` endpoint on a resource.
+HTML5 and IFrame launches work similarly to each other. These launch methods make use of the Citrix HTML5 HDX SDK. This SDK uses the ICA file which contains information about how a connection should be established. An ICA file can be obtained from the `icaFileUrl` endpoint on a resource.
 
 ![HTML Launch Flow](./sequence/html5-launch-flow.png)
 
 Source code to launch a resource in a new tab. For more information check the [SDK documentation](https://developer-docs.citrix.com/en-us/citrix-workspace-app-for-html5/workspace-app-html5-hdx-sdx/hdx-sdk-html5)
-```js
-citrix.receiver.setPath("https://localhost:7500/receiver"); 
+```js 
 let icaFile = await apiHandler.get(launchUrl)
 const sessionId = "html5"
 const connectionParams = {
@@ -110,9 +109,10 @@ const connectionParams = {
 };
 
 function sessionCreated(sessionObject){
-    const launchData = {"type": "ini", value: icaFile.data};
+    const launchData = {"type": "ini", "value": icaFile.data};
     sessionObject.start(launchData);
 }
+citrix.receiver.setPath("CDN");
 citrix.receiver.createSession(sessionId, connectionParams,sessionCreated);
 ```
 
@@ -134,4 +134,4 @@ The repo includes the following JavaScript libraries:
 
 This project is licensed under the MIT license. The text can be found in the [LICENSE file](./LICENSE).
 
-Copyright © 2025. Cloud Software Group, Inc. All Rights Reserved.
+Copyright © 2026. Cloud Software Group, Inc. All Rights Reserved.
